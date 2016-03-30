@@ -1,0 +1,121 @@
+# this function will take 4 points with [x,y] input and the number of transects per-side
+# and list create a list of all of the linear intercepts.
+# The points must be given in either a Counter - clock wise rotaiton.
+# this function does not account of the curvature of the earth, it is only ment to be used
+# for small regions.
+# NOTE: this is not a pur transect as the transect is based on edge length. 
+# This method should only be used in cases where edge is approximately equal.
+# or the edge length weighting is desired.
+
+# result_size = x_break*y_break
+
+
+def parimeter_transect(four_Points, breaks, parimeterMode=False):
+
+	"""	
+	Create a list of points that are evenly spaced with respect to the parimeter.
+	First input should be a list of 4 [x,y] points. 
+	going counter clockwise about the parimeter or the area to be transected.
+	The second input, list the number of vertival and horizontal transects respectivly.
+	The test mode option will list the points that are on the parimeter.
+	"""
+	
+	pointA = four_Points[0]
+	pointB = four_Points[1]
+	pointC = four_Points[2]
+	pointD = four_points[3]
+	
+	x1_dif = abs(float(pointB[0]) - float(pointA[0]))
+	y1_dif = abs(float(pointB[1]) - float(pointA[1]))
+	x2_dif = abs(float(pointD[0]) - float(pointC[0]))
+	y2_dif = abs(float(pointD[1]) - float(pointC[1]))
+	
+	x_break = int(breaks[0])
+	y_break = int(breaks[1])
+	if x_break * y_break > 2000:
+		print "Too many points"
+	else:	
+		# calculate the step size in for the X coordinate in the bottom and top lines
+		x1_dif_step = x1_dif/(x_break - 1)
+		x2_dif_step = x2_dif/(x_break - 1)
+
+		# calculate the step size in for the Y coordinate in the bottom and top lines.
+		y1_dif_step = y1_dif/(x_break - 1)
+		y2_dif_step = y2_dif/(x_break - 1)
+
+		# create a bunch of blank lists, DO NOT JUST SET THEM EQUAL ugh
+		startX = [None] * x_break # line1 x's
+		finishX = [None] * x_break # line2 x's
+		startY = [None] * x_break # line1 y's
+		finishY = [None] * x_break # line2 y's
+
+		# create the output list
+		pari_transect = []
+
+		for i in range(0, x_break):
+			# calculate the exact X,Y for each point on line1 (start line)
+			startX[i] = (pointA[0] + (x1_dif_step * i))
+			startY[i] = (pointA[1] + (y1_dif_step * i))
+			# calculate the exact x,y for each point on line2 (finish line) 
+			finishX[i] = (pointD[0] + (x2_dif_step * i))
+			finishY[i] = (pointD[1] + (y2_dif_step * i))
+		
+		for i in range(0, x_break):
+			# for each of the vertical break (x_breaks), calculate the step length
+			# for the transect that connects the start and finish lines.
+			# the number of steps is the horizontal break lines. 
+			# since we are interested in the number of breaks
+			# in the vertical transects. these step lengths remain constant.
+			delta_x = (finishX[i] - startX[i])/(y_break - 1)
+			delta_y = (finishY[i] - startY[i])/(y_break - 1)
+			for j in range(0, y_break):
+				# the x and y location along the vertical transect and now be calculated.
+				x_local = startX[i] + (j * delta_x)
+				y_local = startY[i] + (j * delta_y)
+				coord = x_local, y_local
+				pari_transect.append([x_local, y_local])
+				left = i == 0
+				right = i == x_break - 1
+				top = j == y_break - 1
+				bottom = j == 0
+				parimeter = (left or right) or (top or bottom)
+				if parimeter and parimeterMode:
+					if left:
+						print "l",i,j, coord
+					elif right:
+						print "r",i,j, coord
+					elif bottom:
+						print "b",i,j, coord
+					elif top:
+						print "t",i,j, coord
+					else:
+						print "wtf"
+				else:
+					print coord
+
+	return pari_transect
+
+
+# input all of the coordinates, these should be float point numbers to avoid error.
+# pointA = [-122.24251,37.81561]
+# pointB = [-122.21025,37.81532]
+# pointC = [-122.22340,37.83184]
+# pointD = [-122.24350,37.83011]
+# 
+# # pointA = [0.0,0.0]
+# # pointB = [30.0,6.0]
+# # pointC = [3.0,100.0]
+# # pointD = [-18.0,4.0]
+# 
+# four_points = [pointA, pointB, pointC, pointD]
+# # pointA = [0.0,0.0] # begin point line1 (start line)
+# # pointB = [1.1,0.1] # end point line1 (start line)
+# # pointC = [1.8,1.4] # begin point line2 (finish line)
+# # pointD = [0.1,1.1] # end point line2 (finish line)
+# 
+# # specify the number of transects, should be atleast 2, otherwise this program is pointless.
+# x_break = 40
+# y_break = 40
+# 
+# breaks = [x_break, y_break]
+# parimeter_transect(four_points, breaks, True)
