@@ -4,8 +4,8 @@
 # this function does not account of the curvature of the earth, it is only ment to be used
 # for small regions.
 # NOTE: this is not a pur transect as the transect is based on edge length. 
-# This method should only be used in cases where edge is approximately equal.
-# or the edge length weighting is desired.
+# This method should only be used in cases where edge lengths are approximately 
+# equal. The number of points per side remains regardless of length.
 
 # result_size = x_break*y_break
 
